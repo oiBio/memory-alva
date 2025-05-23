@@ -217,22 +217,34 @@ class MemoryGame {    constructor() {
         this.canFlip = true;
         this.gameState = 'setup'; // setup, playing, finished
         this.showOriginalFundstuecke = false; // Einstellung für Fundstück-Darstellung
+        this.isSinglePlayer = false; // Einzelspieler-Modus
         
         this.initializeEventListeners();
-    }
-
-    initializeEventListeners() {
+    }    initializeEventListeners() {
         document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
         document.getElementById('resetGameBtn').addEventListener('click', () => this.resetGame());
         document.getElementById('playAgainBtn').addEventListener('click', () => this.resetGame());
+        
+        // Spielmodus-Auswahl Event Listener
+        document.getElementById('gameMode').addEventListener('change', (e) => {
+            this.togglePlayerSetup(e.target.value === 'singleplayer');
+        });
     }    startGame() {
-        const player1Name = document.getElementById('player1Name').value.trim() || 'Spieler 1';
-        const player2Name = document.getElementById('player2Name').value.trim() || 'Spieler 2';
+        const gameMode = document.getElementById('gameMode').value;
+        const player1Name = document.getElementById('player1Name').value.trim() || 'Alva';
+        const player2Name = document.getElementById('player2Name').value.trim() || 'Papa/Mama';
         const cardSetsCount = parseInt(document.getElementById('cardSetsCount').value) || 6;
         const showOriginalFundstuecke = document.getElementById('showOriginalFundstuecke').checked;
 
+        this.isSinglePlayer = gameMode === 'singleplayer';
         this.showOriginalFundstuecke = showOriginalFundstuecke;
-        this.setupPlayers(player1Name, player2Name);
+        
+        if (this.isSinglePlayer) {
+            this.setupSinglePlayer(player1Name);
+        } else {
+            this.setupPlayers(player1Name, player2Name);
+        }
+        
         this.setupCards(cardSetsCount);
         this.gameState = 'playing';
         
@@ -261,7 +273,20 @@ class MemoryGame {    constructor() {
             }
         ];
         this.currentPlayerIndex = 0;
-    }    setupCards(cardSetsCount) {
+    }    setupSinglePlayer(name) {
+        this.players = [
+            {
+                id: 1,
+                name: name,
+                score: 0,
+                collectedPairs: [],
+                collectedFundstuecke: []
+            }
+        ];
+        this.currentPlayerIndex = 0;
+    }
+
+    setupCards(cardSetsCount) {
         // Create pairs of cards - cardSetsCount is the number of pairs we want
         const selectedVariants = this.shuffleArray([...ALL_IMAGE_VARIANTS]).slice(0, cardSetsCount);
         this.cards = [];
@@ -391,32 +416,53 @@ class MemoryGame {    constructor() {
         });
 
         return cardElement;
-    }
-
-    renderPlayerInfo() {
+    }    renderPlayerInfo() {
         const container = document.getElementById('player-info-container');
         container.innerHTML = '';
+        
+        // Adjust container layout for single player
+        if (this.isSinglePlayer) {
+            container.className = 'player-info-container flex justify-center items-start gap-4 p-4';
+        } else {
+            container.className = 'player-info-container flex justify-between items-start gap-4 p-4';
+        }
 
         this.players.forEach((player, index) => {
             const playerDiv = document.createElement('div');
             playerDiv.id = `player-info-${player.id}`;
-            playerDiv.className = 'player-info text-center flex-1 min-w-0';
+            
+            // Optimize layout for single player
+            if (this.isSinglePlayer) {
+                playerDiv.className = 'player-info text-center max-w-md w-full';
+            } else {
+                playerDiv.className = 'player-info text-center flex-1 min-w-0';
+            }
             
             const isActive = index === this.currentPlayerIndex;
             if (isActive) {
                 playerDiv.classList.add('player-active');
             }
 
+            // Enhanced display for single player
+            const nameDisplay = this.isSinglePlayer ? 
+                `<h2 class="text-2xl font-bold mb-3 text-blue-600">${player.name}</h2>` :
+                `<h3 class="text-xl font-bold mb-2">${player.name}</h3>`;
+                
+            const scoreDisplay = this.isSinglePlayer ?
+                `<div class="player-score mb-4 text-3xl font-bold text-green-600">${player.score} Punkte</div>` :
+                `<div class="player-score mb-2">${player.score} Punkte</div>`;
+
             playerDiv.innerHTML = `
-                <h3 class="text-xl font-bold mb-2">${player.name}</h3>
-                <div class="player-score mb-2">${player.score} Punkte</div>
-                <div class="text-sm">
+                ${nameDisplay}
+                ${scoreDisplay}
+                <div class="text-sm ${this.isSinglePlayer ? 'space-y-3' : ''}">
                     <div class="mb-1">Paare: ${player.collectedPairs.length}</div>
                     <div class="flex flex-wrap justify-center gap-1 mb-2">
                         ${player.collectedPairs.map(pair => 
                             `<span class="collected-item-icon">${pair[0].display}</span>`
                         ).join('')}
-                    </div>                    <div class="mb-1">Fundstücke: ${player.collectedFundstuecke.length}</div>
+                    </div>
+                    <div class="mb-1">Fundstücke: ${player.collectedFundstuecke.length}</div>
                     <div class="flex flex-wrap justify-center gap-1">
                         ${player.collectedFundstuecke.map(item => 
                             `<span class="collected-item-icon">${this.getFundstueckDisplay(item)}</span>`
@@ -562,23 +608,27 @@ class MemoryGame {    constructor() {
                 this.switchToNextPlayer();
             }
         }, GAME_CONFIG.TURN_TRANSITION_DELAY);
-    }
-
-    switchToNextPlayer() {
-        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+    }    switchToNextPlayer() {
+        if (!this.isSinglePlayer) {
+            this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+        }
         this.renderPlayerInfo();
         this.setCurrentPlayerMessage();
         this.canFlip = true;
-    }
-
-    setCurrentPlayerMessage() {
+    }    setCurrentPlayerMessage() {
         const remainingCards = this.getRemainingCardsCount();
         const cardsToFlip = Math.min(GAME_CONFIG.MAX_FLIPPED_CARDS, remainingCards);
         const currentPlayer = this.players[this.currentPlayerIndex];
         
-        const message = `${currentPlayer.name} ist dran! Wähle ${cardsToFlip} Karte${cardsToFlip !== 1 ? 'n' : ''}.`;
+        let message;
+        if (this.isSinglePlayer) {
+            message = `${currentPlayer.name}, wähle ${cardsToFlip} Karte${cardsToFlip !== 1 ? 'n' : ''} aus!`;
+        } else {
+            message = `${currentPlayer.name} ist dran! Wähle ${cardsToFlip} Karte${cardsToFlip !== 1 ? 'n' : ''}.`;
+        }
+        
         document.getElementById('game-message').textContent = message;
-    }    endGame(reason = 'all_matched') {
+    }endGame(reason = 'all_matched') {
         this.gameState = 'finished';
         this.canFlip = false;
         
@@ -626,17 +676,31 @@ class MemoryGame {    constructor() {
                 ? this.remainingCards.map(card => card.display).join(' ')
                 : '';
             
-            endReasonDiv.innerHTML = `
-                <div class="text-center">
+            let endMessage;
+            if (this.isSinglePlayer) {
+                endMessage = `
+                    <h3 class="text-xl font-bold text-yellow-800 mb-2">🎯 Spiel beendet!</h3>
+                    <p class="text-yellow-700 mb-2">
+                        Super gemacht! Es sind nur noch einzelne Karten übrig - keine Paare mehr möglich.
+                    </p>
+                `;
+            } else {
+                endMessage = `
                     <h3 class="text-xl font-bold text-yellow-800 mb-2">⚠️ Spiel automatisch beendet</h3>
                     <p class="text-yellow-700 mb-2">
                         Es sind nur noch einzelne Karten übrig - keine Paare mehr möglich!
                     </p>
+                `;
+            }
+            
+            endReasonDiv.innerHTML = `
+                <div class="text-center">
+                    ${endMessage}
                     ${remainingCardsDisplay ? `
                         <div class="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-300">
                             <p class="text-yellow-800 font-semibold mb-2">Diese Karten waren noch übrig:</p>
                             <div class="text-2xl">${remainingCardsDisplay}</div>
-                            <p class="text-sm text-yellow-600 mt-1">Pech für alle - diese Karten sind aus dem Spiel!</p>
+                            <p class="text-sm text-yellow-600 mt-1">Diese Karten sind aus dem Spiel!</p>
                         </div>
                     ` : ''}
                 </div>
@@ -677,19 +741,30 @@ class MemoryGame {    constructor() {
             
             finalScoresDiv.appendChild(playerScoreDiv);
         });
-        
-        // Add winner announcement
+          // Add winner announcement
         if (sortedPlayers.length > 0) {
             const winner = sortedPlayers[0];
             const isATie = sortedPlayers.length > 1 && sortedPlayers[1].score === winner.score;
             
             const winnerDiv = document.createElement('div');
             winnerDiv.className = 'text-center mt-6 p-4 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-lg';
-            winnerDiv.innerHTML = `
-                <h2 class="text-2xl font-bold text-yellow-900">
-                    ${isATie ? '🎉 Unentschieden! 🎉' : `🎊 ${winner.name} gewinnt! 🎊`}
-                </h2>
-            `;
+            
+            if (this.isSinglePlayer) {
+                winnerDiv.innerHTML = `
+                    <h2 class="text-2xl font-bold text-yellow-900">
+                        🎉 Fantastisch gespielt, ${winner.name}! 🎉
+                    </h2>
+                    <p class="text-yellow-800 font-semibold mt-2">
+                        Du hast ${winner.score} Punkt${winner.score !== 1 ? 'e' : ''} erreicht!
+                    </p>
+                `;
+            } else {
+                winnerDiv.innerHTML = `
+                    <h2 class="text-2xl font-bold text-yellow-900">
+                        ${isATie ? '🎉 Unentschieden! 🎉' : `🎊 ${winner.name} gewinnt! 🎊`}
+                    </h2>
+                `;
+            }
             
             finalScoresDiv.appendChild(winnerDiv);
         }
@@ -701,10 +776,13 @@ class MemoryGame {    constructor() {
         this.flippedCards = [];
         this.canFlip = true;
         this.showOriginalFundstuecke = false;
+        this.isSinglePlayer = false;
         this.remainingCards = [];
         
-        // Reset checkbox
+        // Reset form elements
         document.getElementById('showOriginalFundstuecke').checked = false;
+        document.getElementById('gameMode').value = 'multiplayer';
+        document.getElementById('player2Setup').style.display = 'block';
         
         UI.showSetupScreen();
     }
@@ -743,6 +821,16 @@ class MemoryGame {    constructor() {
         }
         
         return { shouldEnd: false, reason: null };
+    }    // Spielmodus umschalten zwischen Einzel- und Zweispielermodus
+    togglePlayerSetup(isSinglePlayer) {
+        const player2Setup = document.getElementById('player2Setup');
+        if (isSinglePlayer) {
+            player2Setup.style.display = 'none';
+            player2Setup.classList.add('hidden');
+        } else {
+            player2Setup.style.display = 'block';
+            player2Setup.classList.remove('hidden');
+        }
     }
 }
 

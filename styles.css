@@ -148,10 +148,35 @@ body {
     transition: var(--transition-smooth);
 }
 
+.player-info-container {
+    transition: all 0.3s ease;
+}
+
+/* Enhanced styling for single-player mode */
+.player-info.max-w-md {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+}
+
 .player-score {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--primary-color);
+}
+
+.player-info.max-w-md .player-score {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.player-info.max-w-md h2 {
+    text-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .collected-item-icon {
@@ -929,4 +954,28 @@ input, select, textarea {
         height: 40px;
         border-width: 5px;
     }
+}
+
+/* Spielmodus-Selector Styling */
+.game-mode-selector {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.game-mode-selector select {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Verbesserte Animation für Player Setup Toggle */
+#player2Setup {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+#player2Setup.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
 }

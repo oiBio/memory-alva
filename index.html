@@ -25,21 +25,28 @@
                 <h2 class="text-2xl font-bold mb-4 text-gray-700">🎮 Spiel einrichten</h2>
                 <p class="text-gray-600 mb-4">Bereitet euch vor für ein magisches Memory-Abenteuer!</p>
             </div>
+              <div class="max-w-xs mx-auto mb-4">
+                <label for="gameMode" class="block mb-2 font-semibold text-gray-700">🎮 Spielmodus:</label>
+                <select id="gameMode" class="form-input w-full">
+                    <option value="singleplayer">🧠 Einzelspieler (nur Alva)</option>
+                    <option value="multiplayer" selected>👥 Zwei Spieler</option>
+                </select>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+            <div id="player-setup" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
                 <div>
                     <label for="player1Name" class="block mb-2 font-semibold text-gray-700">👑 Spieler 1:</label>
                     <input type="text" id="player1Name" value="Alva" 
                            class="form-input w-full" maxlength="20" 
                            placeholder="Dein Name...">
                 </div>
-                <div>
+                <div id="player2Setup">
                     <label for="player2Name" class="block mb-2 font-semibold text-gray-700">🎯 Spieler 2:</label>
                     <input type="text" id="player2Name" value="Papa/Mama" 
                            class="form-input w-full" maxlength="20"
                            placeholder="Dein Name...">
                 </div>
-            </div>              <div class="max-w-xs mx-auto">
+            </div><div class="max-w-xs mx-auto">
                 <label for="cardSetsCount" class="block mb-2 font-semibold text-gray-700">🃏 Schwierigkeitsgrad:</label>
                 <select id="cardSetsCount" class="form-input w-full">
                     <option value="6">Leicht (6 Paare = 12 Karten)</option>
