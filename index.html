@@ -2,7 +2,11 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ec4899">
     <title>Alvas Fantastisches Fundstück-Memory</title>
     <meta name="description" content="Ein bezauberndes Memory-Spiel mit einer besonderen Wendung - sammle Paare und entdecke magische Fundstücke!">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,10 +48,9 @@
                     <option value="24">Experte (24 Paare = 48 Karten)</option>
                 </select>
             </div>
-            
-            <div class="max-w-xs mx-auto">
-                <label class="flex items-center justify-center space-x-2 cursor-pointer">
-                    <input type="checkbox" id="showOriginalFundstuecke" class="form-checkbox h-5 w-5 text-pink-500 rounded">
+              <div class="max-w-xs mx-auto">
+                <label class="flex items-center justify-center space-x-3 cursor-pointer p-2">
+                    <input type="checkbox" id="showOriginalFundstuecke" class="form-checkbox">
                     <span class="font-semibold text-gray-700">✨ Fundstücke als Original-Icons zeigen</span>
                 </label>
                 <p class="text-sm text-gray-500 mt-1 text-center">
@@ -75,11 +78,9 @@
             <!-- Game Message -->
             <div id="game-message" class="game-message min-h-[3rem] flex items-center justify-center">
                 <!-- Game messages appear here -->
-            </div>
-
-            <!-- Control Buttons -->
-            <div class="text-center space-x-4">
-                <button id="resetGameBtn" class="btn btn-secondary">
+            </div>            <!-- Control Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="resetGameBtn" class="btn btn-secondary w-full sm:w-auto">
                     🏠 Neues Spiel
                 </button>
             </div>
@@ -95,10 +96,11 @@
             <div id="final-scores" class="text-left space-y-4">
                 <!-- Final scores will be displayed here -->
             </div>
-            
-            <button id="playAgainBtn" class="btn btn-tertiary text-xl px-8 py-4">
-                🔄 Nochmal spielen!
-            </button>
+              <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="playAgainBtn" class="btn btn-tertiary w-full sm:w-auto">
+                    🔄 Nochmal spielen!
+                </button>
+            </div>
         </div>
     </div>
 

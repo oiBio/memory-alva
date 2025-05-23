@@ -298,21 +298,54 @@ class MemoryGame {    constructor() {
     renderGame() {
         this.renderGameBoard();
         this.renderPlayerInfo();
-    }
-
-    renderGameBoard() {
+    }    renderGameBoard() {
         const gameBoard = document.getElementById('game-board');
         gameBoard.innerHTML = '';
         
-        // Adjust grid based on number of cards
+        // Responsive grid layout based on screen size and number of cards
         const numCards = this.cards.length;
-        if (numCards <= 16) {
-            gameBoard.className = 'game-board grid grid-cols-4';
-        } else if (numCards <= 24) {
-            gameBoard.className = 'game-board grid grid-cols-6';
-        } else {
-            gameBoard.className = 'game-board grid grid-cols-6';
+        const screenWidth = window.innerWidth;
+        
+        let gridClass = 'game-board grid';
+        
+        // Optimized grid for different screen sizes and card counts
+        if (screenWidth <= 480) { // Mobile
+            if (numCards <= 12) {
+                gridClass += ' grid-cols-3';
+            } else if (numCards <= 24) {
+                gridClass += ' grid-cols-4';
+            } else {
+                gridClass += ' grid-cols-4';
+            }
+        } else if (screenWidth <= 768) { // Tablet
+            if (numCards <= 16) {
+                gridClass += ' grid-cols-4';
+            } else if (numCards <= 24) {
+                gridClass += ' grid-cols-4';
+            } else if (numCards <= 36) {
+                gridClass += ' grid-cols-6';
+            } else {
+                gridClass += ' grid-cols-6';
+            }
+        } else if (screenWidth <= 1024) { // Large Tablet
+            if (numCards <= 16) {
+                gridClass += ' grid-cols-4';
+            } else if (numCards <= 24) {
+                gridClass += ' grid-cols-6';
+            } else {
+                gridClass += ' grid-cols-6';
+            }
+        } else { // Desktop
+            if (numCards <= 16) {
+                gridClass += ' grid-cols-4';
+            } else if (numCards <= 24) {
+                gridClass += ' grid-cols-6';
+            } else {
+                gridClass += ' grid-cols-8';
+            }
         }
+        
+        gameBoard.className = gridClass;
 
         this.cards.forEach((cardData, index) => {
             const cardElement = this.createCardElement(cardData, index);
@@ -320,7 +353,7 @@ class MemoryGame {    constructor() {
         });
     }    createCardElement(cardData, index) {
         const cardElement = document.createElement('div');
-        cardElement.className = 'card h-20 md:h-24 relative'; // Ensure 'relative' is here if .card-face is 'absolute'
+        cardElement.className = 'card relative'; // Responsive height will be handled by CSS
         cardElement.dataset.cardIndex = index;
         cardElement.setAttribute('tabindex', '0');
         cardElement.setAttribute('role', 'button');
@@ -717,12 +750,17 @@ class MemoryGame {    constructor() {
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new MemoryGame();
     
-    // Handle window resize for confetti canvas
+    // Handle window resize for confetti canvas and responsive layout
     window.addEventListener('resize', () => {
         const canvas = document.getElementById('confetti-canvas');
         if (canvas) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+        }
+        
+        // Re-render game board for responsive layout
+        if (window.game && window.game.gameState === 'playing') {
+            window.game.renderGameBoard();
         }
     });
 });
