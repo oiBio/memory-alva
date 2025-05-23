@@ -497,13 +497,13 @@ class MemoryGame {    constructor() {
             fc.element.style.transform = 'scale(0.8)';
             fc.element.style.pointerEvents = 'none';
         });
-        
-        // Clear flipped cards
+          // Clear flipped cards
         this.flippedCards = [];
         
-        // Check if game is finished
-        if (this.getRemainingCardsCount() === 0) {
-            setTimeout(() => this.endGame(), GAME_CONFIG.TURN_TRANSITION_DELAY);
+        // Check if game should end
+        const gameEndCheck = this.checkForGameEnd();
+        if (gameEndCheck.shouldEnd) {
+            setTimeout(() => this.endGame(gameEndCheck.reason), GAME_CONFIG.TURN_TRANSITION_DELAY);
         } else {
             // Player gets another turn
             this.renderPlayerInfo();
@@ -520,7 +520,14 @@ class MemoryGame {    constructor() {
                 fc.data.isFlipped = false;
             });
             this.flippedCards = [];
-            this.switchToNextPlayer();
+            
+            // Check if game should end after failed attempt
+            const gameEndCheck = this.checkForGameEnd();
+            if (gameEndCheck.shouldEnd) {
+                this.endGame(gameEndCheck.reason);
+            } else {
+                this.switchToNextPlayer();
+            }
         }, GAME_CONFIG.TURN_TRANSITION_DELAY);
     }
 
@@ -538,9 +545,7 @@ class MemoryGame {    constructor() {
         
         const message = `${currentPlayer.name} ist dran! Wähle ${cardsToFlip} Karte${cardsToFlip !== 1 ? 'n' : ''}.`;
         document.getElementById('game-message').textContent = message;
-    }
-
-    endGame() {
+    }    endGame(reason = 'all_matched') {
         this.gameState = 'finished';
         this.canFlip = false;
         
@@ -549,10 +554,11 @@ class MemoryGame {    constructor() {
         
         SoundManager.playSound('gameOver');
         UI.showGameOverScreen();
-        this.displayFinalScores();
-    }
-
-    processFundstuecke() {
+        this.displayFinalScores(reason);
+    }    processFundstuecke() {
+        // Speichere verbleibende Karten für Anzeige im Hinweis, aber teile sie NICHT zu
+        this.remainingCards = this.cards.filter(card => !card.isMatched);
+        
         this.players.forEach(player => {
             // Try to form pairs from Fundstücke
             const fundstueckeGroups = {};
@@ -576,11 +582,34 @@ class MemoryGame {    constructor() {
                 player.score -= singles;
             });
         });
-    }
-
-    displayFinalScores() {
+    }displayFinalScores(reason = 'all_matched') {
         const finalScoresDiv = document.getElementById('final-scores');
-        finalScoresDiv.innerHTML = '';
+        finalScoresDiv.innerHTML = '';        // Zeige Hinweis bei vorzeitigem Spielende
+        if (reason === 'no_pairs_possible') {
+            const endReasonDiv = document.createElement('div');
+            endReasonDiv.className = 'mb-6 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-lg';
+            
+            const remainingCardsDisplay = this.remainingCards && this.remainingCards.length > 0 
+                ? this.remainingCards.map(card => card.display).join(' ')
+                : '';
+            
+            endReasonDiv.innerHTML = `
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-yellow-800 mb-2">⚠️ Spiel automatisch beendet</h3>
+                    <p class="text-yellow-700 mb-2">
+                        Es sind nur noch einzelne Karten übrig - keine Paare mehr möglich!
+                    </p>
+                    ${remainingCardsDisplay ? `
+                        <div class="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-300">
+                            <p class="text-yellow-800 font-semibold mb-2">Diese Karten waren noch übrig:</p>
+                            <div class="text-2xl">${remainingCardsDisplay}</div>
+                            <p class="text-sm text-yellow-600 mt-1">Pech für alle - diese Karten sind aus dem Spiel!</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            finalScoresDiv.appendChild(endReasonDiv);
+        }
 
         // Sort players by score
         const sortedPlayers = [...this.players].sort((a, b) => b.score - a.score);
@@ -606,7 +635,7 @@ class MemoryGame {    constructor() {
                     <div>                        <h4 class="font-semibold mb-1">Fundstücke (${player.collectedFundstuecke.length}):</h4>
                         <div class="flex flex-wrap gap-1">
                             ${player.collectedFundstuecke.map(item => 
-                                `<span class="final-display-icon">${this.getFundstueckDisplay(item)}</span>`
+                                `<span class="final-display-icon">${item.display}</span>`
                             ).join('')}
                         </div>
                     </div>
@@ -639,6 +668,7 @@ class MemoryGame {    constructor() {
         this.flippedCards = [];
         this.canFlip = true;
         this.showOriginalFundstuecke = false;
+        this.remainingCards = [];
         
         // Reset checkbox
         document.getElementById('showOriginalFundstuecke').checked = false;
@@ -649,6 +679,37 @@ class MemoryGame {    constructor() {
     // Hilfsfunktion für Fundstück-Darstellung
     getFundstueckDisplay(item) {
         return this.showOriginalFundstuecke ? item.display : '🎁';
+    }
+
+    // Prüft, ob noch Paare gebildet werden können
+    canFormPairs() {
+        const remainingCards = this.cards.filter(card => !card.isMatched);
+        const cardCounts = {};
+        
+        // Zähle wie viele Karten von jedem Typ noch übrig sind
+        remainingCards.forEach(card => {
+            cardCounts[card.id] = (cardCounts[card.id] || 0) + 1;
+        });
+        
+        // Prüfe ob mindestens ein Typ 2 oder mehr Karten hat
+        return Object.values(cardCounts).some(count => count >= 2);
+    }
+
+    // Prüft ob das Spiel automatisch beendet werden sollte
+    checkForGameEnd() {
+        const remainingCards = this.getRemainingCardsCount();
+        
+        // Spiel ist beendet wenn keine Karten mehr da sind
+        if (remainingCards === 0) {
+            return { shouldEnd: true, reason: 'all_matched' };
+        }
+        
+        // Spiel ist beendet wenn keine Paare mehr möglich sind
+        if (!this.canFormPairs()) {
+            return { shouldEnd: true, reason: 'no_pairs_possible' };
+        }
+        
+        return { shouldEnd: false, reason: null };
     }
 }
 
