@@ -304,6 +304,29 @@ body {
     box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
 }
 
+/* Style for active mode and difficulty buttons */
+.btn-mode.active,
+.btn-difficulty.active {
+    background: linear-gradient(135deg, var(--accent-color), #d97706); /* Orange-ähnlich */
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-mode,
+.btn-difficulty {
+    background-color: #e5e7eb; /* Light gray for inactive */
+    color: #374151; /* Dark gray text */
+    border: 2px solid #d1d5db; /* Slightly darker gray border */
+}
+
+.btn-mode:hover:not(.active),
+.btn-difficulty:hover:not(.active) {
+    background-color: #d1d5db;
+    border-color: #9ca3af;
+}
+
+
 /* Game Container */
 .game-container {
     background: rgba(255, 255, 255, 0.95);

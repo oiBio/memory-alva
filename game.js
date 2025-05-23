@@ -226,14 +226,31 @@ class MemoryGame {    constructor() {
         document.getElementById('playAgainBtn').addEventListener('click', () => this.resetGame());
         
         // Spielmodus-Auswahl Event Listener
-        document.getElementById('gameMode').addEventListener('change', (e) => {
-            this.togglePlayerSetup(e.target.value === 'singleplayer');
+        document.querySelectorAll('#gameModeButtons .btn-mode').forEach(button => {
+            button.addEventListener('click', (e) => {
+                document.querySelectorAll('#gameModeButtons .btn-mode').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.togglePlayerSetup(e.target.dataset.value === 'singleplayer');
+            });
+        });
+
+        // Schwierigkeitsgrad-Auswahl Event Listener
+        document.querySelectorAll('#difficultyButtons .btn-difficulty').forEach(button => {
+            button.addEventListener('click', (e) => {
+                document.querySelectorAll('#difficultyButtons .btn-difficulty').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+            });
         });
     }    startGame() {
-        const gameMode = document.getElementById('gameMode').value;
+        const selectedGameModeButton = document.querySelector('#gameModeButtons .btn-mode.active');
+        const gameMode = selectedGameModeButton ? selectedGameModeButton.dataset.value : 'multiplayer';
+        
         const player1Name = document.getElementById('player1Name').value.trim() || 'Alva';
         const player2Name = document.getElementById('player2Name').value.trim() || 'Papa/Mama';
-        const cardSetsCount = parseInt(document.getElementById('cardSetsCount').value) || 6;
+
+        const selectedDifficultyButton = document.querySelector('#difficultyButtons .btn-difficulty.active');
+        const cardSetsCount = selectedDifficultyButton ? parseInt(selectedDifficultyButton.dataset.value) : 6;
+        
         const showOriginalFundstuecke = document.getElementById('showOriginalFundstuecke').checked;
 
         this.isSinglePlayer = gameMode === 'singleplayer';
@@ -781,8 +798,23 @@ class MemoryGame {    constructor() {
         
         // Reset form elements
         document.getElementById('showOriginalFundstuecke').checked = false;
-        document.getElementById('gameMode').value = 'multiplayer';
-        document.getElementById('player2Setup').style.display = 'block';
+        
+        // Reset Game Mode Buttons
+        document.querySelectorAll('#gameModeButtons .btn-mode').forEach(button => {
+            button.classList.remove('active');
+            if (button.dataset.value === 'multiplayer') {
+                button.classList.add('active');
+            }
+        });
+        this.togglePlayerSetup(false); // Show player 2 setup for multiplayer default
+
+        // Reset Difficulty Buttons
+        document.querySelectorAll('#difficultyButtons .btn-difficulty').forEach(button => {
+            button.classList.remove('active');
+            if (button.dataset.value === '12') {
+                button.classList.add('active');
+            }
+        });
         
         UI.showSetupScreen();
     }

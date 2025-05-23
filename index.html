@@ -25,12 +25,12 @@
                 <h2 class="text-2xl font-bold mb-4 text-gray-700">🎮 Spiel einrichten</h2>
                 <p class="text-gray-600 mb-4">Bereitet euch vor für ein magisches Memory-Abenteuer!</p>
             </div>
-              <div class="max-w-xs mx-auto mb-4">
-                <label for="gameMode" class="block mb-2 font-semibold text-gray-700">🎮 Spielmodus:</label>
-                <select id="gameMode" class="form-input w-full">
-                    <option value="singleplayer">🧠 Einzelspieler (nur Alva)</option>
-                    <option value="multiplayer" selected>👥 Zwei Spieler</option>
-                </select>
+            <div class="max-w-md mx-auto mb-4">
+                <label class="block mb-2 font-semibold text-gray-700">🎮 Spielmodus:</label>
+                <div id="gameModeButtons" class="flex justify-center space-x-2">
+                    <button type="button" class="btn btn-mode" data-value="singleplayer">🧠 Einzelspieler</button>
+                    <button type="button" class="btn btn-mode active" data-value="multiplayer">👥 Zwei Spieler</button>
+                </div>
             </div>
             
             <div id="player-setup" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
@@ -46,14 +46,14 @@
                            class="form-input w-full" maxlength="20"
                            placeholder="Dein Name...">
                 </div>
-            </div><div class="max-w-xs mx-auto">
-                <label for="cardSetsCount" class="block mb-2 font-semibold text-gray-700">🃏 Schwierigkeitsgrad:</label>
-                <select id="cardSetsCount" class="form-input w-full">
-                    <option value="6">Leicht (6 Paare = 12 Karten)</option>
-                    <option value="12" selected>Mittel (12 Paare = 24 Karten)</option>
-                    <option value="18">Schwer (18 Paare = 36 Karten)</option>
-                    <option value="24">Experte (24 Paare = 48 Karten)</option>
-                </select>
+            </div><div class="max-w-md mx-auto">
+                <label class="block mb-2 font-semibold text-gray-700">🃏 Schwierigkeitsgrad:</label>
+                <div id="difficultyButtons" class="grid grid-cols-2 gap-2">
+                    <button type="button" class="btn btn-difficulty" data-value="6">Leicht (12)</button>
+                    <button type="button" class="btn btn-difficulty active" data-value="12">Mittel (24)</button>
+                    <button type="button" class="btn btn-difficulty" data-value="18">Schwer (36)</button>
+                    <button type="button" class="btn btn-difficulty" data-value="24">Experte (48)</button>
+                </div>
             </div>
               <div class="max-w-xs mx-auto">
                 <label class="flex items-center justify-center space-x-3 cursor-pointer p-2">
