@@ -167,11 +167,13 @@ class MemoryGame {
         }
 
         cardElement.innerHTML = `
-            <div class="card-face card-back">
-                <span class="text-2xl">🎮</span>
-            </div>
-            <div class="card-face card-front">
-                <span class="text-3xl">${cardData.display}</span>
+            <div class="card-inner">
+                <div class="card-face card-back">
+                    <span class="text-2xl">🎮</span>
+                </div>
+                <div class="card-face card-front">
+                    <span class="text-3xl">${cardData.display}</span>
+                </div>
             </div>
         `;
 
@@ -242,13 +244,10 @@ class MemoryGame {
         }
 
         this.flipCard(cardElement, cardData);
-    }
-
-    flipCard(cardElement, cardData) {
+    }    flipCard(cardElement, cardData) {
         SoundManager.playSound('flip');
         
-        cardElement.classList.add('is-flipped'); // Alte Methode wiederhergestellt
-        // cardElement.style.transform = 'rotateY(180deg)'; // Neue Methode entfernt
+        cardElement.classList.add('is-flipped');
         cardData.isFlipped = true;
         
         this.flippedCards.push({
@@ -315,15 +314,14 @@ class MemoryGame {
         if (fundstueckCard) {
             currentPlayer.collectedFundstuecke.push(fundstueckCard);
             SoundManager.playSound('fundstueck');
-        }
-          // Mark cards as matched and hide them with animation
+        }        // Mark cards as matched and hide them with animation
         this.flippedCards.forEach(fc => {
             fc.data.isMatched = true;
+            fc.element.classList.add('is-matched');
             // Sanfte Animation zum Verschwinden
             fc.element.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
             fc.element.style.opacity = '0';
-            // fc.element.style.transform = 'scale(0.8)'; // Alte Methode
-            fc.element.style.transform = 'rotateY(180deg) scale(0.8)'; // Neue Methode: gedreht und skaliert
+            fc.element.style.transform = 'scale(0.8)';
             fc.element.style.pointerEvents = 'none';
         });
         
@@ -345,8 +343,7 @@ class MemoryGame {
         // Flip cards back after delay
         setTimeout(() => {
             this.flippedCards.forEach(fc => {
-                fc.element.classList.remove('is-flipped'); // Alte Methode wiederhergestellt
-                // fc.element.style.transform = 'rotateY(0deg)'; // Neue Methode entfernt
+                fc.element.classList.remove('is-flipped');
                 fc.data.isFlipped = false;
             });
             this.flippedCards = [];
