@@ -209,14 +209,14 @@ const ALL_IMAGE_VARIANTS = [
     { motif: "Fahrzeug", variantName: "Helikopter", id: "helicopter", display: "🚁" }
 ];
 
-class MemoryGame {
-    constructor() {
+class MemoryGame {    constructor() {
         this.players = [];
         this.cards = [];
         this.currentPlayerIndex = 0;
         this.flippedCards = [];
         this.canFlip = true;
         this.gameState = 'setup'; // setup, playing, finished
+        this.showOriginalFundstuecke = false; // Einstellung für Fundstück-Darstellung
         
         this.initializeEventListeners();
     }
@@ -225,13 +225,13 @@ class MemoryGame {
         document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
         document.getElementById('resetGameBtn').addEventListener('click', () => this.resetGame());
         document.getElementById('playAgainBtn').addEventListener('click', () => this.resetGame());
-    }
-
-    startGame() {
+    }    startGame() {
         const player1Name = document.getElementById('player1Name').value.trim() || 'Spieler 1';
         const player2Name = document.getElementById('player2Name').value.trim() || 'Spieler 2';
         const cardSetsCount = parseInt(document.getElementById('cardSetsCount').value) || 6;
+        const showOriginalFundstuecke = document.getElementById('showOriginalFundstuecke').checked;
 
+        this.showOriginalFundstuecke = showOriginalFundstuecke;
         this.setupPlayers(player1Name, player2Name);
         this.setupCards(cardSetsCount);
         this.gameState = 'playing';
@@ -383,11 +383,10 @@ class MemoryGame {
                         ${player.collectedPairs.map(pair => 
                             `<span class="collected-item-icon">${pair[0].display}</span>`
                         ).join('')}
-                    </div>
-                    <div class="mb-1">Fundstücke: ${player.collectedFundstuecke.length}</div>
+                    </div>                    <div class="mb-1">Fundstücke: ${player.collectedFundstuecke.length}</div>
                     <div class="flex flex-wrap justify-center gap-1">
                         ${player.collectedFundstuecke.map(item => 
-                            `<span class="collected-item-icon">🎁</span>`
+                            `<span class="collected-item-icon">${this.getFundstueckDisplay(item)}</span>`
                         ).join('')}
                     </div>
                 </div>
@@ -604,11 +603,10 @@ class MemoryGame {
                             ).join('')}
                         </div>
                     </div>
-                    <div>
-                        <h4 class="font-semibold mb-1">Fundstücke (${player.collectedFundstuecke.length}):</h4>
+                    <div>                        <h4 class="font-semibold mb-1">Fundstücke (${player.collectedFundstuecke.length}):</h4>
                         <div class="flex flex-wrap gap-1">
                             ${player.collectedFundstuecke.map(item => 
-                                `<span class="final-display-icon">${item.display}</span>`
+                                `<span class="final-display-icon">${this.getFundstueckDisplay(item)}</span>`
                             ).join('')}
                         </div>
                     </div>
@@ -633,17 +631,24 @@ class MemoryGame {
             
             finalScoresDiv.appendChild(winnerDiv);
         }
-    }
-
-    resetGame() {
+    }    resetGame() {
         this.gameState = 'setup';
         this.players = [];
         this.cards = [];
         this.currentPlayerIndex = 0;
         this.flippedCards = [];
         this.canFlip = true;
+        this.showOriginalFundstuecke = false;
+        
+        // Reset checkbox
+        document.getElementById('showOriginalFundstuecke').checked = false;
         
         UI.showSetupScreen();
+    }
+
+    // Hilfsfunktion für Fundstück-Darstellung
+    getFundstueckDisplay(item) {
+        return this.showOriginalFundstuecke ? item.display : '🎁';
     }
 }
 

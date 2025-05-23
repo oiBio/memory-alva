@@ -35,8 +35,7 @@
                            class="form-input w-full" maxlength="20"
                            placeholder="Dein Name...">
                 </div>
-            </div>
-              <div class="max-w-xs mx-auto">
+            </div>              <div class="max-w-xs mx-auto">
                 <label for="cardSetsCount" class="block mb-2 font-semibold text-gray-700">🃏 Schwierigkeitsgrad:</label>
                 <select id="cardSetsCount" class="form-input w-full">
                     <option value="6">Leicht (6 Paare = 12 Karten)</option>
@@ -44,6 +43,16 @@
                     <option value="18">Schwer (18 Paare = 36 Karten)</option>
                     <option value="24">Experte (24 Paare = 48 Karten)</option>
                 </select>
+            </div>
+            
+            <div class="max-w-xs mx-auto">
+                <label class="flex items-center justify-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="showOriginalFundstuecke" class="form-checkbox h-5 w-5 text-pink-500 rounded">
+                    <span class="font-semibold text-gray-700">✨ Fundstücke als Original-Icons zeigen</span>
+                </label>
+                <p class="text-sm text-gray-500 mt-1 text-center">
+                    Deaktiviert: Alle Fundstücke werden als 🎁 angezeigt
+                </p>
             </div>
             
             <button id="startGameBtn" class="btn btn-primary text-xl px-8 py-4">

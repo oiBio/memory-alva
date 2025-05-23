@@ -313,6 +313,40 @@ body {
     box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
 }
 
+/* Checkbox Styling */
+.form-checkbox {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.form-checkbox:checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.form-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
 /* Score Display */
 .score-highlight {
     background: linear-gradient(135deg, #fef3c7, #fde68a);
