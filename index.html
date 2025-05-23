@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alvas Fantastisches Fundstück-Memory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card {
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Safari */
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card-back {
+            background-color: #60a5fa; /* Tailwind blue-400 */
+            color: white;
+        }
+        .card-front {
+            background-color: #f0f0f0;
+            transform: rotateY(180deg);
+        }
+        .player-active {
+            border: 3px solid #facc15; /* Tailwind yellow-400 */
+            box-shadow: 0 0 10px #facc15;
+        }
+        .collected-item-icon { /* Einheitliche Klasse für Fundstücke und Paarteile in der Info */
+            display: inline-block;
+            padding: 0.1rem 0.25rem;
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 0.25rem;
+            font-size: 1.1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin: 1px;
+        }
+        .final-display-icon { /* Für die Endauswertung */
+             display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background-color: #e5e7eb;
+            border-radius: 0.375rem;
+            font-size: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 2px;
+        }
+         .single-card-icon { /* Für einzelne Karten in der Endauswertung */
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background-color: #fee2e2; /* Tailwind red-100 */
+            border: 1px solid #fecaca; /* Tailwind red-200 */
+            border-radius: 0.375rem;
+            font-size: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-400 min-h-screen flex flex-col items-center justify-center p-4 text-gray-800">
+
+    <div id="game-container" class="bg-white/80 backdrop-blur-md shadow-2xl rounded-lg p-6 w-full max-w-4xl">
+        <h1 class="text-4xl font-bold text-center text-pink-600 mb-6">Alvas Fantastisches Fundstück-Memory</h1>
+
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="text-center">
+            <h2 class="text-2xl mb-4">Spiel einrichten</h2>
+            <div class="mb-4">
+                <label for="player1Name" class="block mb-1">Name Spieler 1:</label>
+                <input type="text" id="player1Name" value="Alva" class="p-2 border rounded w-full max-w-xs">
+            </div>
+            <div class="mb-4">
+                <label for="player2Name" class="block mb-1">Name Spieler 2:</label>
+                <input type="text" id="player2Name" value="Papa/Mama" class="p-2 border rounded w-full max-w-xs">
+            </div>
+             <div class="mb-4">
+                <label for="cardSetsCount" class="block mb-1">Anzahl Motiv-Sets (Gesamtkarten durch 3 teilbar):</label>
+                <select id="cardSetsCount" class="p-2 border rounded w-full max-w-xs">
+                    <option value="3">3 Sets (12 Karten)</option>
+                    <option value="6" selected>6 Sets (24 Karten)</option>
+                    <option value="9">9 Sets (36 Karten)</option>
+                </select>
+            </div>
+            <button id="startGameBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl">
+                Spiel starten!
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden">
+            <div class="flex flex-col md:flex-row justify-around mb-6 text-center gap-4" id="player-info-container">
+                <!-- Player info will be generated here -->
+            </div>
+
+            <div id="game-board" class="grid grid-cols-4 gap-3 md:gap-4 mx-auto" style="max-width: 600px;">
+                <!-- Cards will be generated here -->
+            </div>
+
+            <div id="game-message" class="text-center text-xl font-semibold mt-6 mb-2 min-h-[2.5rem]"></div>
+
+            <div class="text-center mt-8">
+                <button id="resetGameBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                    Neues Spiel
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-6">Spielende!</h2>
+            <div id="final-scores" class="text-left md:text-xl mb-6 space-y-4">
+                <!-- Final scores will be displayed here -->
+            </div>
+            <button id="playAgainBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-xl">
+                Nochmal spielen!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const ALL_IMAGE_VARIANTS = [
+            { motif: "Tier", variantName: "Hund", id: "dog", display: "🐶" },
+            { motif: "Tier", variantName: "Katze", id: "cat", display: "🐱" },
+            { motif: "Tier", variantName: "Maus", id: "mouse", display: "🐭" },
+            { motif: "Tier", variantName: "Frosch", id: "frog", display: "🐸" },
+            { motif: "Tier", variantName: "Löwe", id: "lion", display: "🦁" },
+            { motif: "Tier", variantName: "Panda", id: "panda", display: "🐼" },
+            { motif: "Frucht", variantName: "Apfel", id: "apple", display: "🍎" },
+            { motif: "Frucht", variantName: "Banane", id: "banana", display: "🍌" },
+            { motif: "Frucht", variantName: "Kirsche", id: "cherry", display: "🍒" },
+            { motif: "Frucht", variantName: "Erdbeere", id: "strawberry", display: "🍓" },
+            { motif: "Frucht", variantName: "Orange", id: "orange", display: "🍊" },
+            { motif: "Frucht", variantName: "Traube", id: "grape", display: "🍇" },
+            { motif: "Fahrzeug", variantName: "Auto", id: "car", display: "🚗" },
+            { motif: "Fahrzeug", variantName: "Bus", id: "bus", display: "🚌" },
+            { motif: "Fahrzeug", variantName: "Zug", id: "train", display: "🚂" },
+            { motif: "Fahrzeug", variantName: "Flugzeug", id: "plane", display: "✈️" },
+            { motif: "Fahrzeug", variantName: "Schiff", id: "ship", display: "🚢" },
+            { motif: "Fahrzeug", variantName: "Rakete", id: "rocket", display: "🚀" }
+            // Stelle sicher, dass du 18 Varianten hast für 9 Sets
+        ];
+
+        // --- SOUNDS ---
+        // Kurze, lizenzfreie Sounds. Für bessere Kontrolle: Base64 oder lokale Dateien.
+        // Diese URLs sind Beispiele und können sich ändern oder unzuverlässig sein.
+        const SOUNDS = {
+            flip: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'+Array(1e3).join(123)), // Kurzer Klick
+            pair: new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAAIAAD//wAA'), // Heller "Pling"
+            fundstueck: new Audio('data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgIA='), // Sanfter "Swoosh"
+            gameOver: new Audio('data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAACAgIA='), // Platzhalter, könnte Fanfare sein
+        };
+        function playSound(soundName) {
+            try {
+                if (SOUNDS[soundName]) {
+                    SOUNDS[soundName].currentTime = 0; // Zurückspulen, falls noch spielt
+                    SOUNDS[soundName].play().catch(e => console.warn("Audio play failed:", e));
+                }
+            } catch (error) {
+                console.warn("Error playing sound:", soundName, error);
+            }
+        }
+
+
+        // --- DOM ELEMENTS ---
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const player1NameInput = document.getElementById('player1Name');
+        const player2NameInput = document.getElementById('player2Name');
+        const cardSetsCountSelect = document.getElementById('cardSetsCount');
+        
+        const gameBoard = document.getElementById('game-board');
+        const playerInfoContainer = document.getElementById('player-info-container');
+        const gameMessage = document.getElementById('game-message');
+        const finalScoresDiv = document.getElementById('final-scores');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+
+        // --- GAME STATE ---
+        let players = [];
+        let cards = [];
+        let currentPlayerIndex = 0;
+        let flippedCardElements = [];
+        let flippedCardObjects = [];
+        let canFlip = true;
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function getRemainingVisibleCardsCount() {
+            return cards.filter(c => !c.isMatched).length;
+        }
+
+        function initializeGame() {
+            setupScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameMessage.textContent = "";
+
+            players = [
+                { name: player1NameInput.value || "Spieler 1", score: 0, collectedPairsData: [], collectedFundstueckeData: [], id: 0 },
+                { name: player2NameInput.value || "Spieler 2", score: 0, collectedPairsData: [], collectedFundstueckeData: [], id: 1 }
+            ];
+            currentPlayerIndex = 0;
+            
+            const numCardSets = parseInt(cardSetsCountSelect.value);
+            const requiredVariants = numCardSets * 2;
+            if (ALL_IMAGE_VARIANTS.length < requiredVariants) {
+                alert(`Nicht genügend Bildvarianten definiert! Benötigt: ${requiredVariants}, Definiert: ${ALL_IMAGE_VARIANTS.length}`);
+                resetAndShowSetup();
+                return;
+            }
+            const selectedVariants = ALL_IMAGE_VARIANTS.slice(0, requiredVariants); 
+
+            cards = [];
+            selectedVariants.forEach(variant => {
+                cards.push({ ...variant, cardUid: `${variant.id}-${Math.random()}`, isFlipped: false, isMatched: false });
+                cards.push({ ...variant, cardUid: `${variant.id}-${Math.random()}`, isFlipped: false, isMatched: false });
+            });
+            
+            shuffleArray(cards);
+            
+            renderGameBoard();
+            updatePlayerInfo();
+            setGameMessageForCurrentPlayer();
+            canFlip = true;
+        }
+
+        function renderGameBoard() {
+            gameBoard.innerHTML = '';
+            const numCards = cards.length;
+            if (numCards <= 12) gameBoard.className = 'grid grid-cols-4 gap-3 md:gap-4 mx-auto';
+            else if (numCards <= 24) gameBoard.className = 'grid grid-cols-6 gap-2 md:gap-3 mx-auto';
+            else gameBoard.className = 'grid grid-cols-6 gap-2 md:gap-3 mx-auto';
+
+
+            cards.forEach((cardData) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card', 'w-20', 'h-28', 'md:w-24', 'md:h-32', 'lg:w-28', 'lg:h-36', 'relative', 'rounded-md', 'shadow-md');
+                cardElement.dataset.cardUid = cardData.cardUid;
+
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-face', 'card-back', 'rounded-md', 'flex', 'items-center', 'justify-center');
+                cardBack.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L1.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.25 12L15.75 12M18.25 12l2.25-2.25M15.75 12l2.25 2.25M18.25 12l-2.25 2.25M18.25 12l2.25-2.25" /></svg>`;
+
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-face', 'card-front', 'rounded-md', 'flex', 'items-center', 'justify-center', 'text-4xl', 'md:text-5xl');
+                cardFront.textContent = cardData.display;
+
+                cardElement.appendChild(cardBack);
+                cardElement.appendChild(cardFront);
+                cardElement.addEventListener('click', () => handleCardClick(cardElement, cardData));
+                gameBoard.appendChild(cardElement);
+            });
+        }
+        
+        function updatePlayerInfo() {
+            playerInfoContainer.innerHTML = '';
+            players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.classList.add('p-3', 'rounded-lg', 'bg-white/60', 'shadow-lg', 'w-full', 'md:w-auto', 'md:min-w-[220px]');
+                playerDiv.id = `player-info-${player.id}`;
+
+                // Paare anzeigen (als 2 Icons nebeneinander)
+                let pairsHTML = '';
+                if(player.collectedPairsData.length > 0) {
+                    pairsHTML = player.collectedPairsData.map(pairSet => 
+                        `<span class="collected-item-icon">${pairSet[0].display}</span><span class="collected-item-icon">${pairSet[1].display}</span>`
+                    ).join('<span class="mx-1"></span>'); // kleiner Abstand zwischen Paaren
+                } else {
+                    pairsHTML = '<span class="text-xs italic">Keine</span>';
+                }
+
+                const fundstueckeHTML = player.collectedFundstueckeData.map(f => 
+                    `<span class="collected-item-icon">${f.display}</span>`
+                ).join('');
+                
+                playerDiv.innerHTML = `
+                    <h3 class="text-lg font-semibold">${player.name}</h3>
+                    <div class="mt-1">
+                        <span class="text-sm font-medium">Gefundene Paare (${player.collectedPairsData.length}):</span>
+                        <div class="flex flex-wrap gap-1 mt-1 justify-center min-h-[24px]">
+                            ${pairsHTML}
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-sm font-medium">Fundstücke (${player.collectedFundstueckeData.length}):</span>
+                        <div class="flex flex-wrap gap-1 mt-1 justify-center min-h-[24px]">
+                            ${fundstueckeHTML || '<span class="text-xs italic">Keine</span>'}
+                        </div>
+                    </div>
+                `;
+                playerInfoContainer.appendChild(playerDiv);
+            });
+            highlightCurrentPlayer();
+        }
+
+        function highlightCurrentPlayer() {
+            document.querySelectorAll('[id^="player-info-"]').forEach(el => el.classList.remove('player-active'));
+            const activePlayerEl = document.getElementById(`player-info-${players[currentPlayerIndex].id}`);
+            if (activePlayerEl) activePlayerEl.classList.add('player-active');
+        }
+
+        function setGameMessageForCurrentPlayer() {
+            const remainingOnBoard = getRemainingVisibleCardsCount();
+            const cardsToPick = Math.min(3, remainingOnBoard);
+            gameMessage.textContent = `${players[currentPlayerIndex].name} ist dran! Wähle ${cardsToPick} Karte${cardsToPick !== 1 ? 'n' : ''}.`;
+        }
+        
+        function handleCardClick(cardElement, cardData) {
+            if (!canFlip || cardData.isFlipped || cardData.isMatched || flippedCardElements.length >= 3) {
+                return;
+            }
+            if (flippedCardElements.some(el => el === cardElement)) return;
+
+            playSound('flip');
+            cardElement.classList.add('is-flipped');
+            cardData.isFlipped = true;
+            flippedCardElements.push(cardElement);
+            flippedCardObjects.push(cardData);
+
+            const remainingOnBoard = getRemainingVisibleCardsCount() + flippedCardObjects.length;
+            const cardsToPickThisTurn = Math.min(3, remainingOnBoard);
+
+            if (flippedCardObjects.length === cardsToPickThisTurn) {
+                canFlip = false;
+                gameMessage.textContent = "Prüfe...";
+                setTimeout(checkForMatch, 1200);
+            }
+        }
+
+        function checkForMatch() {
+            let foundPair = false;
+            let pairCardsData = []; 
+            let fundstueckCardData = null;
+
+            if (flippedCardObjects.length === 3) {
+                const [c1, c2, c3] = flippedCardObjects;
+                if (c1.id === c2.id) { foundPair = true; pairCardsData = [c1, c2]; fundstueckCardData = c3; }
+                else if (c1.id === c3.id) { foundPair = true; pairCardsData = [c1, c3]; fundstueckCardData = c2; }
+                else if (c2.id === c3.id) { foundPair = true; pairCardsData = [c2, c3]; fundstueckCardData = c1; }
+            } else if (flippedCardObjects.length === 2) {
+                const [c1, c2] = flippedCardObjects;
+                if (c1.id === c2.id) { foundPair = true; pairCardsData = [c1, c2]; }
+            }
+
+            let bonusTurn = false;
+            if (foundPair) {
+                playSound('pair');
+                if (fundstueckCardData) playSound('fundstueck'); // Sound für das "Extra"
+                
+                collectAndMarkCards(pairCardsData, fundstueckCardData);
+                gameMessage.textContent = `Paar gefunden! ${players[currentPlayerIndex].name} ist nochmal dran.`;
+                bonusTurn = true;
+            } else {
+                gameMessage.textContent = "Kein Paar. Nächster Spieler.";
+                flipFlippedCardsBack();
+            }
+            
+            const remainingCardsOnBoard = getRemainingVisibleCardsCount();
+            if (remainingCardsOnBoard === 0) {
+                updatePlayerInfo(); 
+                setTimeout(() => { endGame(); }, 700);
+                return; 
+            }
+
+            finalizeTurn(bonusTurn);
+        }
+
+        function collectAndMarkCards(pairArray, fundstueckCardDataObj) {
+            const currentPlayer = players[currentPlayerIndex];
+            
+            // Speichere das Paar für die Anzeige
+            currentPlayer.collectedPairsData.push([...pairArray]); 
+            
+            // Speichere das Fundstück, falls vorhanden
+            if (fundstueckCardDataObj) {
+                currentPlayer.collectedFundstueckeData.push(fundstueckCardDataObj);
+                fundstueckCardDataObj.isMatched = true;
+            }
+            
+            // Markiere alle genommenen Karten als gematcht
+            pairArray.forEach(cardData => cardData.isMatched = true);
+            
+            flippedCardElements.forEach(cardEl => {
+                cardEl.style.visibility = 'hidden';
+            });
+        }
+
+        function flipFlippedCardsBack() {
+            flippedCardElements.forEach(cardElement => {
+                cardElement.classList.remove('is-flipped');
+                const cardDataObj = cards.find(c => c.cardUid === cardElement.dataset.cardUid);
+                if (cardDataObj) cardDataObj.isFlipped = false;
+            });
+        }
+
+        function finalizeTurn(bonusTurn) {
+            flippedCardElements = [];
+            flippedCardObjects = [];
+            
+            if (!bonusTurn) {
+                currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            }
+            
+            updatePlayerInfo(); 
+            
+            setTimeout(() => { 
+                canFlip = true; 
+                setGameMessageForCurrentPlayer();
+            }, 500); 
+        }
+        
+        function endGame() {
+            canFlip = false;
+            playSound('gameOver'); // Fanfare oder ähnliches
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            calculateFinalScores();
+        }
+
+        function calculateFinalScores() {
+            finalScoresDiv.innerHTML = '';
+            players.forEach(player => {
+                let finalPlayerScore = 0;
+                
+                // Alle vom Spieler gesammelten Karten für die Endauswertung zusammenführen
+                let allCollectedCardsForScoring = [];
+                player.collectedPairsData.forEach(pairSet => {
+                    allCollectedCardsForScoring.push(...pairSet);
+                });
+                allCollectedCardsForScoring.push(...player.collectedFundstueckeData);
+
+                const cardCounts = {};
+                allCollectedCardsForScoring.forEach(card => {
+                    cardCounts[card.id] = (cardCounts[card.id] || 0) + 1;
+                });
+
+                let totalPlayerPairsCount = 0;
+                let singleCardsCount = 0;
+                let singleCardDisplaysList = [];
+
+                for (const cardId_key in cardCounts) {
+                    const count = cardCounts[cardId_key];
+                    totalPlayerPairsCount += Math.floor(count / 2);
+                    if (count % 2 !== 0) {
+                        singleCardsCount++;
+                        const exampleCard = allCollectedCardsForScoring.find(c => c.id === cardId_key);
+                        if (exampleCard) {
+                            singleCardDisplaysList.push(`<span class="single-card-icon">${exampleCard.display}</span>`);
+                        }
+                    }
+                }
+                
+                finalPlayerScore = (totalPlayerPairsCount * 2) - singleCardsCount;
+                player.score = finalPlayerScore;
+
+                // Anzeige der direkt gesammelten Paare und Fundstücke
+                let directPairsHTML = player.collectedPairsData.map(pSet => `<span class="final-display-icon">${pSet[0].display}</span><span class="final-display-icon">${pSet[1].display}</span>`).join('<span class="mx-1"></span>');
+                let directFundstueckeHTML = player.collectedFundstueckeData.map(f => `<span class="final-display-icon">${f.display}</span>`).join('');
+
+
+                const playerScoreDiv = document.createElement('div');
+                playerScoreDiv.classList.add('mb-4', 'p-4', 'border', 'rounded-lg', 'bg-white/70', 'shadow-md');
+                playerScoreDiv.innerHTML = `
+                    <h3 class="font-bold text-2xl text-pink-500">${player.name}</h3>
+                    <p class="mt-1">Direkt gefundene Paare (${player.collectedPairsData.length}):</p>
+                    <div class="flex flex-wrap gap-1 my-1 justify-start">
+                        ${directPairsHTML || '<span>Keine</span>'}
+                    </div>
+                    <p class="mt-1">Direkt gesammelte Fundstücke (${player.collectedFundstueckeData.length}):</p>
+                    <div class="flex flex-wrap gap-1 my-1 justify-start">
+                         ${directFundstueckeHTML || '<span>Keine</span>'}
+                    </div>
+                    <hr class="my-3">
+                    <p class="font-semibold mt-2">Endauswertung aller Karten:</p>
+                    <p>» Gesamtpaare gebildet: ${totalPlayerPairsCount} (x 2 Punkte)</p>
+                    <div class="mt-1">
+                        <p>» Einzelne Karten übrig: ${singleCardsCount} (x -1 Punkt)</p>
+                        <div class="flex flex-wrap gap-2 my-2 justify-start">
+                             ${singleCardDisplaysList.join('') || '<span>Keine</span>'}
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold mt-3">Endpunktzahl: ${finalPlayerScore}</p>
+                `;
+                finalScoresDiv.appendChild(playerScoreDiv);
+            });
+
+            let winnerText = "";
+            const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+            if (sortedPlayers.length > 0) {
+                const topScore = sortedPlayers[0].score;
+                const winners = sortedPlayers.filter(p => p.score === topScore);
+                if (winners.length === 1) {
+                    winnerText = `<p class="mt-6 text-3xl text-green-600 font-bold text-center">🎉 ${winners[0].name} gewinnt! 🎉</p>`;
+                } else {
+                    winnerText = `<p class="mt-6 text-3xl text-blue-600 font-bold text-center">Unentschieden zwischen ${winners.map(w=>w.name).join(' und ')}!</p>`;
+                }
+            }
+            finalScoresDiv.innerHTML += winnerText;
+        }
+        
+        function resetAndShowSetup() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            canFlip = true;
+        }
+
+        // --- EVENT LISTENERS ---
+        startGameBtn.addEventListener('click', initializeGame);
+        resetGameBtn.addEventListener('click', resetAndShowSetup);
+        playAgainBtn.addEventListener('click', resetAndShowSetup);
+
+        // Initial state: Show setup screen
+        resetAndShowSetup();
+    </script>
+</body>
+</html>
