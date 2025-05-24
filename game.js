@@ -220,6 +220,9 @@ class MemoryGame {    constructor() {
         this.isSinglePlayer = false; // Einzelspieler-Modus
         
         this.initializeEventListeners();
+        // Load persisted settings and state
+        this.loadSettings();
+        this.promptResume();
     }    initializeEventListeners() {
         document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
         document.getElementById('resetGameBtn').addEventListener('click', () => this.resetGame());
@@ -270,6 +273,8 @@ class MemoryGame {    constructor() {
         this.setCurrentPlayerMessage();
         
         SoundManager.playSound('gameStart');
+        this.saveSettings();
+        this.saveGameState();
     }
 
     setupPlayers(name1, name2) {
@@ -599,12 +604,16 @@ class MemoryGame {    constructor() {
         // Check if game should end
         const gameEndCheck = this.checkForGameEnd();
         if (gameEndCheck.shouldEnd) {
-            setTimeout(() => this.endGame(gameEndCheck.reason), GAME_CONFIG.TURN_TRANSITION_DELAY);
+            setTimeout(() => {
+                this.endGame(gameEndCheck.reason);
+                this.saveGameState();
+            }, GAME_CONFIG.TURN_TRANSITION_DELAY);
         } else {
             // Player gets another turn
             this.renderPlayerInfo();
             this.setCurrentPlayerMessage();
             this.canFlip = true;
+            this.saveGameState();
         }
     }    handleNoPairFound() {
         SoundManager.playSound('noMatch');
@@ -621,8 +630,10 @@ class MemoryGame {    constructor() {
             const gameEndCheck = this.checkForGameEnd();
             if (gameEndCheck.shouldEnd) {
                 this.endGame(gameEndCheck.reason);
+                this.saveGameState();
             } else {
                 this.switchToNextPlayer();
+                this.saveGameState();
             }
         }, GAME_CONFIG.TURN_TRANSITION_DELAY);
     }    switchToNextPlayer() {
@@ -632,6 +643,8 @@ class MemoryGame {    constructor() {
         this.renderPlayerInfo();
         this.setCurrentPlayerMessage();
         this.canFlip = true;
+        // Save state after switching player
+        this.saveGameState();
     }    setCurrentPlayerMessage() {
         const remainingCards = this.getRemainingCardsCount();
         const cardsToFlip = Math.min(GAME_CONFIG.MAX_FLIPPED_CARDS, remainingCards);
@@ -816,6 +829,7 @@ class MemoryGame {    constructor() {
             }
         });
         
+        this.clearSavedGameState();
         UI.showSetupScreen();
     }
 
@@ -863,6 +877,92 @@ class MemoryGame {    constructor() {
             player2Setup.style.display = 'block';
             player2Setup.classList.remove('hidden');
         }
+    }
+    // Persist user settings
+    saveSettings() {
+        const settings = {
+            player1Name: document.getElementById('player1Name').value.trim(),
+            player2Name: document.getElementById('player2Name').value.trim(),
+            gameMode: this.isSinglePlayer ? 'singleplayer' : 'multiplayer',
+            difficulty: document.querySelector('#difficultyButtons .btn-difficulty.active').dataset.value,
+            showOriginalFundstuecke: this.showOriginalFundstuecke
+        };
+        localStorage.setItem('memoryGameSettings', JSON.stringify(settings));
+    }
+    loadSettings() {
+        const settingsStr = localStorage.getItem('memoryGameSettings');
+        if (!settingsStr) return;
+        const settings = JSON.parse(settingsStr);
+        if (settings.player1Name) document.getElementById('player1Name').value = settings.player1Name;
+        if (settings.player2Name) document.getElementById('player2Name').value = settings.player2Name;
+        // Restore game mode selection
+        document.querySelectorAll('#gameModeButtons .btn-mode').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.value === settings.gameMode);
+        });
+        this.togglePlayerSetup(settings.gameMode === 'singleplayer');
+        // Restore difficulty selection
+        document.querySelectorAll('#difficultyButtons .btn-difficulty').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.value === settings.difficulty);
+        });
+        // Restore checkbox
+        document.getElementById('showOriginalFundstuecke').checked = settings.showOriginalFundstuecke;
+    }
+    // Persist and restore game state for resume
+    saveGameState() {
+        // Serialize players by cardUid to avoid object mismatches
+        const playersState = this.players.map(p => ({
+            id: p.id,
+            name: p.name,
+            score: p.score,
+            collectedPairs: p.collectedPairs.map(pair => pair.map(card => card.cardUid)),
+            collectedFundstuecke: p.collectedFundstuecke.map(card => card.cardUid)
+        }));
+        const state = {
+            cards: this.cards,
+            playersState,
+            currentPlayerIndex: this.currentPlayerIndex,
+            gameState: this.gameState,
+            showOriginalFundstuecke: this.showOriginalFundstuecke,
+            isSinglePlayer: this.isSinglePlayer
+        };
+        localStorage.setItem('memoryGameState', JSON.stringify(state));
+    }
+    loadGameState() {
+        const stateStr = localStorage.getItem('memoryGameState');
+        return stateStr ? JSON.parse(stateStr) : null;
+    }
+    clearSavedGameState() {
+        localStorage.removeItem('memoryGameState');
+    }
+    promptResume() {
+        const state = this.loadGameState();
+        if (state && state.gameState === 'playing') {
+            // Automatisch unterbrochenes Spiel fortsetzen
+            this.restoreGameState(state);
+        }
+    }
+    restoreGameState(state) {
+        // Restore cards
+        this.cards = state.cards;
+        // Restore players with object references
+        this.players = state.playersState.map(ps => ({
+            id: ps.id,
+            name: ps.name,
+            score: ps.score,
+            collectedPairs: ps.collectedPairs.map(uidPair =>
+                uidPair.map(uid => this.cards.find(c => c.cardUid === uid))
+            ),
+            collectedFundstuecke: ps.collectedFundstuecke.map(uid =>
+                this.cards.find(c => c.cardUid === uid)
+            )
+        }));
+        this.currentPlayerIndex = state.currentPlayerIndex;
+        this.gameState = state.gameState;
+        this.showOriginalFundstuecke = state.showOriginalFundstuecke;
+        this.isSinglePlayer = state.isSinglePlayer;
+        UI.showGameScreen();
+        this.renderGame();
+        this.setCurrentPlayerMessage();
     }
 }
 
