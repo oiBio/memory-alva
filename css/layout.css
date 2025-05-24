@@ -1,0 +1,110 @@
+/* Alvas Fantastisches Fundstück-Memory - Layout */
+
+/* Game Container */
+.game-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* Game Board */
+.game-board {
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Player Info */
+.player-info {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.player-info-container {
+    transition: all 0.3s ease;
+}
+
+/* Enhanced styling for single-player mode */
+.player-info.max-w-md {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+}
+
+.player-score {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.player-info.max-w-md .player-score {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.player-info.max-w-md h2 {
+    text-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.player-active {
+    border: 3px solid var(--accent-color);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+    animation: pulse-glow 2s infinite;
+}
+
+/* Title */
+.title {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: title-glow 3s ease-in-out infinite alternate;
+}
+
+/* Game Mode Selector */
+.game-mode-selector {
+    margin-bottom: 1rem;
+}
+
+.game-mode-selector select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    font-family: inherit;
+}
+
+/* Player Setup Toggle */
+#player2Setup {
+    transition: all 0.3s ease;
+}
+
+#player2Setup.hidden {
+    opacity: 0;
+    transform: translateX(-20px);
+    pointer-events: none;
+}
+
+/* Konfetti Canvas */
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}

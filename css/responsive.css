@@ -1,0 +1,323 @@
+/* Alvas Fantastisches Fundstück-Memory - Responsive Design */
+
+/* Large tablets and small desktops */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .card {
+        min-height: 90px;
+    }
+    
+    .card-face {
+        font-size: 1.8rem;
+    }
+    
+    .game-board {
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+    
+    .title {
+        font-size: 2.5rem;
+    }
+    
+    .form-input, .form-checkbox {
+        min-height: 40px;
+    }
+    
+    .game-message {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Tablets - optimiert für Kinder */
+@media (max-width: 768px) and (min-width: 481px) {
+    .card {
+        min-height: 100px;
+    }
+    
+    .card-face {
+        font-size: 2.2rem;
+    }
+    
+    .game-board {
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        min-height: 50px;
+    }
+    
+    .title {
+        font-size: 2.8rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-input {
+        padding: 1rem;
+        font-size: 1.1rem;
+        min-height: 50px;
+    }
+    
+    .form-checkbox {
+        width: 1.5rem;
+        height: 1.5rem;
+        min-width: 50px;
+        min-height: 50px;
+    }
+    
+    .game-message {
+        padding: 1.25rem;
+        font-size: 1.1rem;
+        border-radius: 16px;
+    }
+    
+    .player-info {
+        padding: 1.25rem;
+        border-radius: 20px;
+    }
+    
+    .player-score {
+        font-size: 1.8rem;
+    }
+    
+    .collected-item-icon {
+        padding: 0.4rem 0.6rem;
+        font-size: 1.3rem;
+        margin: 4px;
+    }
+    
+    .final-display-icon {
+        padding: 0.6rem 0.9rem;
+        font-size: 1.8rem;
+        margin: 6px;
+    }
+    
+    /* Bessere Touch-Abstände für Tablets */
+    .space-y-6 > * + * {
+        margin-top: 2rem;
+    }
+    
+    .space-x-4 > * + * {
+        margin-left: 1.5rem;
+    }
+
+    .btn + .btn {
+        margin-left: 1rem;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+    .card {
+        min-height: 70px;
+    }
+    
+    .card-face {
+        font-size: 1.5rem;
+    }
+    
+    .game-board {
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .title {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        font-size: 1rem;
+        min-height: 44px;
+    }
+    
+    .form-checkbox {
+        width: 1.25rem;
+        height: 1.25rem;
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .game-message {
+        padding: 1rem;
+        font-size: 0.9rem;
+        margin: 1rem 0;
+    }
+    
+    .player-info {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .player-score {
+        font-size: 1.3rem;
+    }
+    
+    .collected-item-icon {
+        padding: 0.3rem 0.5rem;
+        font-size: 1rem;
+        margin: 2px;
+    }
+    
+    .final-display-icon {
+        padding: 0.4rem 0.6rem;
+        font-size: 1.2rem;
+        margin: 3px;
+    }
+    
+    /* Kleinere Abstände auf kleinen Bildschirmen */
+    .space-y-6 > * + * {
+        margin-top: 1.5rem;
+    }
+    
+    .space-x-4 > * + * {
+        margin-left: 1rem;
+    }
+    
+    /* Stack buttons vertically on very small screens */
+    .text-center.space-x-4 {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .text-center.space-x-4 > * + * {
+        margin-left: 0;
+        margin-top: 0;
+    }
+}
+
+/* Tablet-optimierte Spacing-Klassen */
+@media (max-width: 768px) {
+    .space-y-6 > * + * {
+        margin-top: 1.5rem;
+    }
+    
+    .gap-4 {
+        gap: 1rem;
+    }
+    
+    .p-4 {
+        padding: 1.5rem;
+    }
+    
+    .p-6 {
+        padding: 2rem;
+    }
+}
+
+/* Verbesserte Sichtbarkeit für Game Messages auf Tablets */
+@media (max-width: 768px) {
+    .game-message {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+        border-width: 3px;
+    }
+}
+
+/* Optimierte Grid-Layouts für verschiedene Kartenzahlen auf Tablets */
+@media (max-width: 768px) {
+    .grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    
+    .grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    
+    .grid-cols-6 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Verbesserte Accessibility für Tablet-Navigation */
+@media (max-width: 768px) {
+    .card[tabindex="0"]:focus {
+        outline: 4px solid var(--accent-color);
+        outline-offset: 4px;
+    }
+    
+    .btn:focus {
+        outline: 4px solid var(--accent-color);
+        outline-offset: 4px;
+    }
+}
+
+/* Spezielle Tablet-Orientierung Unterstützung */
+@media screen and (orientation: landscape) and (max-height: 768px) {
+    .game-container {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card {
+        min-height: 60px;
+    }
+    
+    .card-face {
+        font-size: 1.4rem;
+    }
+}
+
+@media screen and (orientation: portrait) and (max-width: 768px) {
+    .game-board {
+        max-width: 100%;
+    }
+    
+    .card {
+        aspect-ratio: 1;
+    }
+}
+
+/* Verbesserte Button-Sichtbarkeit auf Tablets */
+@media (max-width: 768px) {
+    .btn-mode.active,
+    .btn-difficulty.active {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        transform: translateY(-2px);
+    }
+}
+
+/* Verbesserte Spieler-Info Darstellung auf Tablets */
+@media (max-width: 768px) {
+    .player-info-container {
+        gap: 1.5rem;
+    }
+    
+    .player-info {
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+
+/* Verbesserte Ladeanzeige */
+@media (max-width: 768px) {
+    .loading {
+        width: 24px;
+        height: 24px;
+        border-width: 4px;
+    }
+}

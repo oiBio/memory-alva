@@ -1,0 +1,336 @@
+/* Alvas Fantastisches Fundstück-Memory - Components */
+
+/* Card Components */
+.card {
+    cursor: pointer;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    perspective: 1000px;
+    transition: var(--transition-smooth);
+    min-height: 80px; /* Mindesthöhe für bessere Touch-Bedienung */
+}
+
+.card:hover:not([style*="pointer-events: none"]):not(.is-flipped) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+}
+
+.card.is-flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+}
+
+.card-back {
+    transform: rotateY(0deg);
+}
+
+.card-front {
+    transform: rotateY(180deg);
+}
+
+.card.is-flipped:hover:not(.is-matched) {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.card.is-matched {
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.card-back {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.card-back::before {
+    content: '⭐';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.card-back::after {
+    content: '🎲';
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.card-front {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 3px solid #e5e7eb;
+    color: #1f2937;
+}
+
+/* Button Components */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+    min-height: 44px; /* WCAG-konforme Mindestgröße für Touch-Targets */
+    min-width: 88px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    font-size: 1.1rem;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--error-color), #dc2626);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.btn-tertiary {
+    background: linear-gradient(135deg, var(--secondary-color), #7c3aed);
+    color: white;
+    font-size: 1.1rem;
+}
+
+.btn-tertiary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+/* Style for active mode and difficulty buttons */
+.btn-mode.active,
+.btn-difficulty.active {
+    background: linear-gradient(135deg, var(--accent-color), #d97706);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-mode,
+.btn-difficulty {
+    background-color: #e5e7eb;
+    color: #374151;
+    border: 2px solid #d1d5db;
+}
+
+.btn-mode:hover:not(.active),
+.btn-difficulty:hover:not(.active) {
+    background-color: #d1d5db;
+    border-color: #9ca3af;
+}
+
+/* Form Components */
+.form-input {
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition-smooth);
+    background: rgba(255, 255, 255, 0.9);
+    min-height: 44px;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
+.form-checkbox {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-checkbox:checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-checkbox:checked::after {
+    content: '✓';
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.form-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
+/* Item Display Components */
+.collected-item-icon {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 2px;
+    transition: var(--transition-smooth);
+}
+
+.collected-item-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.final-display-icon {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 12px;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin: 4px;
+    border: 2px solid #e5e7eb;
+}
+
+.single-card-icon {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border: 2px solid #fca5a5;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+    margin: 4px;
+    position: relative;
+}
+
+.single-card-icon::before {
+    content: '⚠️';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.8rem;
+}
+
+/* Score and Message Components */
+.score-highlight {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid var(--accent-color);
+    border-radius: 12px;
+    padding: 0.5rem;
+    font-weight: bold;
+    color: #92400e;
+}
+
+.game-message {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid var(--accent-color);
+    border-radius: 12px;
+    padding: 1rem;
+    font-weight: bold;
+    color: #92400e;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+/* Loading Component */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Focus indicators */
+.card:focus,
+.btn:focus,
+.form-input:focus {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Verbesserte Fokus-Sichtbarkeit für Tastatur-Navigation */
+.card:focus-visible,
+.btn:focus-visible,
+.form-input:focus-visible,
+.form-checkbox:focus-visible {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.2);
+}
