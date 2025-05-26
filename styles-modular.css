@@ -1,8 +1,0 @@
-/* Alvas Fantastisches Fundstück-Memory - Main Styles */
-
-/* Import all CSS modules */
-@import url('css/base.css');
-@import url('css/components.css');
-@import url('css/layout.css');
-@import url('css/animations.css');
-@import url('css/responsive.css');
